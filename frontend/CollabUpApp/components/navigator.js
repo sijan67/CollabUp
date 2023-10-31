@@ -60,7 +60,9 @@ export default function Navigator() {
   <NavigationContainer>
     <PaperProvider theme={theme}>
       <Stack.Navigator>
-        <Stack.Screen name="Home" component={Home}/>
+        <Stack.Screen name="Home" component={Home} options={{
+              headerShown: false, // Hide the title of the Home screen
+            }}/>
         <Stack.Screen name="Welcome" component={Welcome}/>
       </Stack.Navigator>
   </PaperProvider>
