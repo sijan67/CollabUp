@@ -6,6 +6,8 @@ import Interaction from '../screens/InteractionPage/InteractionPage';
 import Profile from '../screens/ProfilePage/ProfilePage';
 import Welcome from '../screens/WelcomePage/WelcomePage';
 
+import { PostProvider } from '../context/post-context';
+
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -59,12 +61,14 @@ export default function Navigator() {
   return (
   <NavigationContainer>
     <PaperProvider theme={theme}>
+      <PostProvider>
       <Stack.Navigator>
         <Stack.Screen name="Home" component={Home} options={{
               headerShown: false, // Hide the title of the Home screen
             }}/>
         <Stack.Screen name="Welcome" component={Welcome}/>
       </Stack.Navigator>
+      </PostProvider>
   </PaperProvider>
   </NavigationContainer>
   );
