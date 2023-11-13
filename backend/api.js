@@ -4,6 +4,8 @@ let db = require('./userOperations');
 let setup = require('./dbSetup');
 let {User} = require('./dbSchema/users');
 let {UserDetails} = require('./dbSchema/userDetails');
+let {UserPics} = require('./dbSchema/userPics');
+let {UserSkills} = require('./dbSchema/userSkills');
 let express = require('express');
 let bodyParser = require('body-parser');
 let cors = require('cors');
@@ -42,11 +44,7 @@ router.route('/setupDB').get((req, res) => {
 router.route('/createUser').post((req, res) => {
     db.checkUserExists(req.body.email, req.body.username).then((userExists) => {
         if (userExists == 0) { 
-            db.getNewUserID().then((newID) => {
-            console.log(newID)
-            console.log(req.body.email)
             const newUser = new User();
-            newUser.id = newID;
             newUser.email = req.body.email;
             newUser.username = req.body.username;
             newUser.password = req.body.password;
@@ -58,7 +56,6 @@ router.route('/createUser').post((req, res) => {
                 } else {
                     res.status(500).send('User Creation Failed');
                 }
-            })
             })
         } else if (userExists == 1) {
             res.status(401).send('User already exists with this email')
@@ -89,6 +86,47 @@ router.route('/addUserDets').post((req, res) => {
                     res.status(201).send('User Details successfully created');
                 } else {
                     res.status(400).send('User Detail creation failed, malformatted request');
+                }
+            })
+        } else {
+            res.status(404).send("No user found");
+        }
+    })
+})
+
+
+router.route('/addUserPic').post((req, res) => {
+    db.getUserByUsername(req.body.username).then((user) => {
+        if(user.length != 0) {
+            const newUserPic = new UserPics();
+            newUserPic.userID = user[0].id;
+            newUserPic.profPic = req.body.profPic;
+            db.addUserPic(newUserPic).then((data) => {
+                if (data != null) {
+                    res.status(201).send('User Pic successfully stored');
+                } else {
+                    res.status(400).send('User Pic creation failed, malformatted request');
+                }
+            })
+        } else {
+            res.status(404).send("No user found");
+        }
+    })
+})
+
+
+router.route('/addUserSkill').post((req, res) => {
+    db.getUserByUsername(req.body.username).then((user) => {
+        if(user.length != 0) {
+            const newUserSkill = new UserSkills();
+            newUserSkill.userID = user[0].id;
+            newUserSkill.skill = req.body.skill;
+            newUserSkill.experience = req.body.experience;
+            db.addUserSkill(newUserSkill).then((data) => {
+                if (data != null) {
+                    res.status(201).send('User Skill successfully stored');
+                } else {
+                    res.status(400).send('User Skill creation failed, malformatted request');
                 }
             })
         } else {
