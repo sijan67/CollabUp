@@ -1,5 +1,6 @@
 var config = require('./dbconfig.js');
 const sql = require('mssql');
+let bcrypt = require('bcrypt');
 
 
 //creates the USERS table and adds the admin account
@@ -10,12 +11,15 @@ async function addUsersTable() {
         table.columns.add('id', sql.Int, {nullable: false, primary: true})
         table.columns.add('email', sql.NVarChar(50), {nullable: false})
         table.columns.add('username', sql.NVarChar(20), {nullable:false})
-        table.columns.add('password', sql.NVarChar(20), {nullable:false})
+        table.columns.add('password', sql.NVarChar(100), {nullable:false})
         table.columns.add('firstName', sql.NVarChar(20), {nullable: false})
         table.columns.add('lastName', sql.NVarChar(30), {nullable: false})
 
-        table.rows.add(1, 'admin@gmail.com', 'admin', 'adminpass', 'Admin', 'Account')
-        
+        const salt = await bcrypt.genSalt(10)
+        let adminPass = await bcrypt.hash('adminpass', salt)
+        console.log(adminPass)
+        table.rows.add(1, 'admin@gmail.com', 'admin', adminPass, 'Admin', 'Account')
+
         let pool = await sql.connect(config)
         let createTable = await pool.request().bulk(table, (err, result) => {
             console.log('users created')
@@ -24,6 +28,7 @@ async function addUsersTable() {
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -56,6 +61,7 @@ async function addUserDetailsTable() {
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -82,6 +88,7 @@ async function addUserSkillsTable() {
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -105,6 +112,7 @@ async function addUserPicsTable() {
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 
 }

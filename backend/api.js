@@ -12,6 +12,7 @@ let cors = require('cors');
 let app = express();
 let router = express.Router();
 
+
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
 app.use(cors());
@@ -22,25 +23,82 @@ let port = process.env.PORT || 8090;
 //will be called before any other routes
 //can add authentication, authorization, logging options here
 router.use((req, res, next) => {
-    console.log('middleware');
+    //console.log('middleware');
     next();
 });
 
 
+///////////////////////////////// DEV METHODS /////////////////////////////////////////
+
+//Used to set up the database with the necessary tables and the admin account info
 router.route('/setupDB').get((req, res) => {
     console.log('Setup DB Started');
 
-    setup.addUsersTable().then(
-        setup.addUserDetailsTable()).then(
-            setup.addUserSkillsTable()).then(
-                setup.addUserPicsTable()).then((data) => {
-                    res.status(201).send('DB Setup Successfully');
-                })
+    setup.addUsersTable().then((userTable) => {
+        if (userTable != null) {
+            setup.addUserDetailsTable().then((userDetsTable) => {
+                if (userDetsTable != null) {
+                    setup.addUserSkillsTable().then((userSkillsTable) => {
+                        if (userSkillsTable != null) {
+                            setup.addUserPicsTable().then((userPicsTable) => {
+                                if (userPicsTable != null) {
+                                    res.status(201).send('DB Setup Successfully');
+                                } else {
+                                    res.status(500).send('User Pics table failed')
+                                }
+                            })
+                        } else {
+                            res.status(500).send("User Skills table failed")
+                        }
+                    })
+                } else {
+                    res.status(500).send("User Details table failed")
+                }
+            })
+        } else {
+            res.status(500).send("Users table failed");
+        }
+    })
     
 })
 
+//will return a list of all users in the system, including their passwords
+router.route('/users').get((req, res) => {
+    db.getUserIDs().then((data) => {
+        if (data != null) {
+        res.status(200).json(data[0]);
+        } else {
+            res.status(404).send("Error");
+        }
+    })
+})
 
-//TODO: encrypt password
+
+
+///////////////////////////// User Creation and Login ///////////////////////////////
+
+//Login method
+router.route('/login').get((req, res) => {
+    let loginUsername = req.body.loginName;
+    let loginPassword = req.body.password;  
+
+    db.getPassFromLogin(loginUsername).then((digest) => {
+        if ((digest != null)) {
+            db.comparePass(loginPassword, digest).then((isValid) => {
+                if (isValid) {
+                    res.status(200).send('User Login Successful');
+                } else {
+                    res.status(403).send('Bad Credentials, login unsuccessful');
+                }
+            })
+        } else {
+            res.status(403).send('Bad Credentials, login unsuccessful');
+        }
+    })   
+})
+
+
+//Creates a user
 router.route('/createUser').post((req, res) => {
     db.checkUserExists(req.body.email, req.body.username).then((userExists) => {
         if (userExists == 0) { 
@@ -67,6 +125,7 @@ router.route('/createUser').post((req, res) => {
 })
 
 
+// Creates the user's details
 router.route('/addUserDets').post((req, res) => {
     db.getUserByUsername(req.body.username).then((user) => {
         if(user.length != 0) {
@@ -95,6 +154,7 @@ router.route('/addUserDets').post((req, res) => {
 })
 
 
+//Creates the user's profile pic
 router.route('/addUserPic').post((req, res) => {
     db.getUserByUsername(req.body.username).then((user) => {
         if(user.length != 0) {
@@ -115,6 +175,9 @@ router.route('/addUserPic').post((req, res) => {
 })
 
 
+/////////////////////////////////// User profile POST/PATCH Endpoints /////////////////////////
+
+//Adds a user's skills to the db
 router.route('/addUserSkill').post((req, res) => {
     db.getUserByUsername(req.body.username).then((user) => {
         if(user.length != 0) {
@@ -136,36 +199,31 @@ router.route('/addUserSkill').post((req, res) => {
 })
 
 
-//TODO: Encrypt password
-router.route('/login').get((req, res) => {
-    let loginUsername = req.body.loginName;
-    let loginPassword = req.body.password;  
 
-    db.getPassFromLogin(loginUsername).then((pass) => {
-        if ((pass != null) && (pass == loginPassword)) {
-            res.status(200).send('User Login Successful');
+
+////////////////////////////// User GET Endpoints //////////////////////////
+
+//Gets a user's info by their username, will not return password
+router.route('/getUser').get((req, res) => {
+    db.getUserByUsername(req.body.username).then((user) => {
+        if (user.length != 0) {
+            res.status(200).json({
+                id: user[0].id,
+                email: user[0].email,
+                username: user[0].username,
+                firstName: user[0].firstName,
+                lastName: user[0].lastName
+            });
         } else {
-            res.status(403).send('Bad Credentials, login unsuccessful');
-        }
-    })   
-})
-
-
-
-
-router.route('/users').get((req, res) => {
-    db.getUserIDs().then((data) => {
-        if (data != null) {
-        res.status(200).json(data[0]);
-        } else {
-            res.status(404).send("Error");
+            res.status(404).send("User not found");
         }
     })
 })
+
  
 
-
-router.route('/user').get((req, res) => {
+//Gets a user's info by their userID, will not return password
+router.route('/getUserByID').get((req, res) => {
     db.getUserByID(req.body.id).then((data) => {
         if (data.length != 0) {
             res.status(200).json({
@@ -177,6 +235,55 @@ router.route('/user').get((req, res) => {
             });
         } else {
             res.status(404).send("User does not Exist");
+        }
+    })
+})
+
+
+
+//Gets a user's user details by their username
+router.route('/getUserDets').get((req, res) => {
+    db.getUserDetsByUsername(req.body.username).then((userDets) => {
+        if (userDets.length != 0 ) {
+            res.status(200).json(userDets[0]);
+        } else {
+            res.status(404).send("User not found");
+        }
+    })
+})
+
+
+//Gets a user's list of skills
+router.route('/getUserSkills').get((req, res) => {
+    db.getUserByUsername(req.body.username).then((user) => {
+        if (user.length != 0) {
+            db.getUserSkills(user[0].id).then((userSkills) => {
+                if (userSkills.length != 0) {
+                    res.status(200).json(userSkills);
+                } else {
+                    res.status(404).send("No user skills found")
+                }
+            })
+        } else {
+            res.status(404).send("User not found")
+        }
+    })
+})
+
+
+//Gets a user's profile pic
+router.route('/getUserPic').get((req, res) => {
+    db.getUserByUsername(req.body.username).then((user) => {
+        if (user.length != 0) {
+            db.getUserPic(user[0].id).then((userPic) => {
+                if (userPic.length != 0) {
+                    res.status(200).json(userPic[0].profPic);
+                } else {
+                    res.status(404).send("No user pic found")
+                }
+            })
+        } else {
+            res.status(404).send("User not found")
         }
     })
 })
