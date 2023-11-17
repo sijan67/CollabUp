@@ -94,7 +94,7 @@ async function getUserDetsByUsername(username) {
     }
 }
 
-
+/*
 async function getUserSkills(userID) {
     try {
         let pool = await sql.connect(config);
@@ -106,7 +106,7 @@ async function getUserSkills(userID) {
         console.log(err);
     }
 }
-
+*/
 
 async function getUserPic(userID) {
     try {
@@ -202,6 +202,7 @@ async function addUserDetails(newUserDetails) {
         .input('input_username', sql.NVarChar(20), newUserDetails.username)
         .input('input_birthdate', sql.DateTime, newUserDetails.birthdate)
         .input('input_occupation', sql.NVarChar(50), newUserDetails.occupation)
+        .input('input_skill', sql.NVarChar(30), newUserDetails.skill)
         .input('input_experience', sql.Int, newUserDetails.experience)
         .input('input_location', sql.NVarChar(50), newUserDetails.location)
         .input('input_worklink', sql.NVarChar(50), newUserDetails.worklink)
@@ -236,7 +237,7 @@ async function addUserPic(newUserPic) {
     }
 }
 
-
+/*
 async function addUserSkill(newUserSkill) {
     try {
         let newSkillID = await getNextPrimaryID("userSkills");
@@ -255,10 +256,9 @@ async function addUserSkill(newUserSkill) {
         return null;
     }
 }
-
+*/
 
 async function getNextPrimaryID(tableName) {
-
     const queryString = "SELECT MAX(id) as maxID FROM " + tableName + ";"
     let pool = await sql.connect(config);
     let highestNextID = await pool.request()
@@ -277,9 +277,9 @@ module.exports = {
     addUserDetails: addUserDetails,
     getNextPrimaryID: getNextPrimaryID,
     addUserPic: addUserPic,
-    addUserSkill: addUserSkill,
+    //addUserSkill: addUserSkill,
     getUserDetsByUsername: getUserDetsByUsername,
-    getUserSkills: getUserSkills,
+    //getUserSkills: getUserSkills,
     getUserPic: getUserPic,
     comparePass: comparePass
 }
