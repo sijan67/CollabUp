@@ -22,16 +22,28 @@ export default function PostItem({ post }) {
   return (
     <Pressable
       style={styles.container}
-      onPress={() => navigation.navigate("post-details", { ...post })}
     >
       <PostLeftSide {...post} />
       <View style={{ flexShrink: 1, gap: 6 }}>
+        {/* Info about each post */}
         <PostHeading
-          name={post.author.name}
+          name={post.title}
           verified={post.author.verified}
           createdAt={post.createdAt}
         />
+        
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <Text style={{ fontSize: 11, fontWeight: 600 }}>{post.author.name}</Text>
+          <Text style={{ fontSize: 11, color: "gray" }}>{timeAgo(post.createdAt)} ago</Text>
+        </View>
+        <View style={{flexDirection: 'row'}}>
+          <Text style={{fontSize: 11,  fontWeight: 600}}>Related Skills</Text>
+          <Text style={{fontSize: 11,   marginLeft: 10 }}> {post.author.skills} </Text>
+        </View>
+        
         <Text>{post.content}</Text>
+        
+
         {post.image && (
           <Image
             source={post.image}
@@ -41,10 +53,12 @@ export default function PostItem({ post }) {
             transition={500}
           />
         )}
+
+   
         <BottomIcons />
         <PostFooter replies={post.repliesCount} likes={post.likesCount} />
       </View>
-      {/* <Text>{post.title}</Text> */}
+      
     </Pressable>
   );
 }
@@ -77,7 +91,8 @@ function PostLeftSide(post) {
           gap: 3,
         }}
       >
-        {[1, 2, 3].map((index) => (
+
+        {/* {[1, 2, 3].map((index) => (
           <Image
             key={index}
             source={post.replies[index - 1]?.author.photo}
@@ -86,7 +101,7 @@ function PostLeftSide(post) {
             contentFit="cover"
             transition={500}
           />
-        ))}
+        ))} */}
       </View>
     </View>
   );
@@ -109,19 +124,30 @@ export function PostHeading({ name, createdAt, verified }) {
           <MaterialIcons name="verified" size={14} color="#60a5fa" />
         )} */}
       </View>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-        <Text style={{ color: "gray" }}>{timeAgo(createdAt)}</Text>
-        <Feather name="more-horizontal" size={14} color="gray" />
-      </View>
+      {/* <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+      <Text style={{ color: "gray" }}> by {name}</Text>
+        <Text style={{ color: "gray" }}>{timeAgo(createdAt)} ago</Text>
+      </View> */}
     </View>
   );
 }
 
 export function PostFooter({ replies, likes }) {
+  const iconSize = 20;
+  const iconColor = "black"; 
+
   return (
+
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+  
+    <FontAwesome name="heart-o" size={iconSize} color={iconColor} />
     <Text style={{ color: "gray" }}>
-       {likes} likes · {replies} replies 
+       {likes} likes 
     </Text>
+
+  </View>
+
+   
   );
 }
 
@@ -131,8 +157,8 @@ export function BottomIcons() {
 
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-      <FontAwesome name="heart-o" size={iconSize} color={iconColor} />
-      <Ionicons name="chatbubble-outline" size={iconSize} color={iconColor} />
+      {/* <FontAwesome name="heart-o" size={iconSize} color={iconColor} /> */}
+      {/* <Ionicons name="chatbubble-outline" size={iconSize} color={iconColor} /> */}
     </View>
   );
 }

@@ -9,6 +9,7 @@ export function createRandomFollower() {
     id: faker.string.uuid(),
     photo: faker.image.avatar(),
     name,
+    skills: faker.person.bio(),
     verified: Math.random() >= 0.5,
     bio: faker.person.bio(),
     username: faker.internet.userName(),
@@ -25,6 +26,7 @@ export function createRandomUser() {
     id: faker.string.uuid(),
     photo: faker.image.avatar(),
     name,
+    skills: faker.person.bio(),
     verified: Math.random() >= 0.5,
     bio: faker.person.bio(),
     followers: new Array(Math.floor(Math.random() * 10))
