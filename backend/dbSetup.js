@@ -3,13 +3,54 @@ const sql = require('mssql');
 let bcrypt = require('bcrypt');
 
 
+async function resetdb() {
+    try {
+        let wipeTables = await deleteTables();
+        if (wipeTables == null) {
+            return null;
+        } else {
+            let userTables = await addUserRelatedTables();
+            if(userTables == null){
+                return null;
+            } else {
+                let projectTables = await addProjectRelatedTables();
+                return projectTables;
+            }
+        }
+    } catch (err) {
+        console.log(err)
+        return null;
+    }
+}
+
+async function deleteTables() {
+    try {
+        let pool = await sql.connect(config)
+        let users = await pool.request().query("DROP TABLE users")
+        let userDets = await pool.request().query("DROP TABLE userDetails")
+        let userPics = await pool.request().query("DROP TABLE userPics")
+        let projects = await pool.request().query("DROP TABLE projects")
+        let userProjects = await pool.request().query("DROP TABLE userProjects")
+        let projectPics = await pool.request().query("DROP TABLE projectPics")
+        let projectSkills = await pool.request().query("DROP TABLE projectSkills")
+        if (users == null || userDets == null || userPics == null || projects == null || userProjects == null || projectPics == null || projectSkills == null) {
+            return null;
+        } else {
+            return projectSkills;
+        }
+    } catch (err) {
+        console.log(err)
+        return null;
+    }
+}
+
 async function addUserRelatedTables() {
     try {
         let usersTable = await addUsersTable();
         let userDetTable = await addUserDetailsTable();
-        let userSkillsTable = await addUserSkillsTable();
+        //let userSkillsTable = await addUserSkillsTable();
         let userPicsTable = await addUserPicsTable();
-        if (usersTable == null || userDetTable == null || userSkillsTable == null || userPicsTable == null) {
+        if (usersTable == null || userDetTable == null || userPicsTable == null) {
             return null;
         } else {
             return 1;
@@ -34,7 +75,6 @@ async function addUsersTable() {
 
         const salt = await bcrypt.genSalt(10)
         let adminPass = await bcrypt.hash('adminpass', salt)
-        console.log(adminPass)
         table.rows.add(1, 'admin@gmail.com', 'admin', adminPass, 'Admin', 'Account')
 
         let pool = await sql.connect(config)
@@ -267,5 +307,6 @@ async function addProjectPicsTable() {
 
 module.exports = {
     addUserRelatedTables: addUserRelatedTables,
-    addProjectRelatedTables: addProjectRelatedTables
+    addProjectRelatedTables: addProjectRelatedTables,
+    resetdb: resetdb
 }

@@ -37,6 +37,7 @@ async function getUserIDs() {
     }
     catch (err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -50,6 +51,7 @@ async function getUserByID(userID){
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -64,6 +66,7 @@ async function getUserByUsername(username){
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -77,6 +80,7 @@ async function getUserByEmail(email){
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -91,6 +95,7 @@ async function getUserDetsByUsername(username) {
 
     } catch (err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -117,6 +122,7 @@ async function getUserPic(userID) {
         return userPic.recordsets[0];
     } catch (err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -166,6 +172,7 @@ async function getPassFromLogin(loginName){
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -209,7 +216,7 @@ async function addUserDetails(newUserDetails) {
         .input('input_pubemail', sql.NVarChar(50), newUserDetails.pubemail)
         .input('input_description', sql.NVarChar(200), newUserDetails.description)
         .input('input_achievements', sql.NVarChar(100), newUserDetails.achievements)
-        .query("INSERT INTO userDetails (id, username, birthdate, occupation, experience, location, worklink, pubemail, description, achievements) VALUES (@input_id, @input_username, @input_birthdate, @input_occupation, @input_experience, @input_location, @input_worklink, @input_pubemail, @input_description, @input_achievements)");
+        .query("INSERT INTO userDetails (id, username, birthdate, occupation, skill, experience, location, worklink, pubemail, description, achievements) VALUES (@input_id, @input_username, @input_birthdate, @input_occupation, @input_skill, @input_experience, @input_location, @input_worklink, @input_pubemail, @input_description, @input_achievements)");
         return insterUserDetails.recordsets;
     }
     catch(err) {
@@ -222,12 +229,13 @@ async function addUserDetails(newUserDetails) {
 async function addUserPic(newUserPic) {
     try {
         let newPicID = await getNextPrimaryID("userPics");
+        let buf = Buffer.from(newUserPic.profPic, 'base64');
 
         let pool = await sql.connect(config);
         let insterUserPic = await pool.request()
         .input('input_id', sql.Int, newPicID)
         .input('input_userID', sql.Int, newUserPic.userID)
-        .input('input_profpic', sql.VarBinary(sql.MAX), newUserPic.profPic)
+        .input('input_profpic', sql.VarBinary(sql.MAX), buf)
         .query("INSERT INTO userPics (id, userID, profPic) VALUES (@input_id, @input_userID, @input_profpic)");
         return insterUserPic.recordsets;
     }

@@ -1,6 +1,7 @@
 const { query } = require('express');
 var config = require('./dbconfig.js');
 const sql = require('mssql');
+const util = require('util');
 
 
 async function addProject(newProj) {
@@ -36,12 +37,13 @@ async function addProject(newProj) {
 async function addProjectPic(newPic) {
     try {
         let newPicID = await getNextPrimaryID("projectPics");
+        let buf = Buffer.from(newPic.projPic, 'base64');
 
         let pool = await sql.connect(config);
         let insertPic = await pool.request()
         .input('input_id', sql.Int, newPicID)
         .input('input_projID', sql.Int, newPic.projID)
-        .input('input_projPic', sql.VarBinary(sql.MAX), newPic.projPic)
+        .input('input_projPic', sql.VarBinary(sql.MAX), buf)
         .query("INSERT INTO projectPics (id, projID, projPic) VALUES (@input_id, @input_projID, @input_projPic)")
         return insertPic.recordsets;
     } catch (err) {
@@ -81,6 +83,70 @@ async function likeProject(newUserProj) {
         .input('input_created', sql.Int, newUserProj.created)
         .query("INSERT INTO userProjects (id, userID, projID, created) VALUES (@input_id, @input_userID, @input_projID, @input_created)")
         return insertLike.recordsets;
+    } catch (err) {
+        console.log(err)
+        return null;
+    }
+}
+
+
+async function updateProject(request) {
+    try {
+
+        if (request.body.hasOwnProperty('newTitle') && request.body.hasOwnProperty('newIdea')) {
+            let pool = await sql.connect(config);
+            let projUpdate = await pool.request()
+            .input('input_projID', sql.Int, request.body.projectID)
+            .input('input_newTitle', sql.NVarChar(100), request.body.newTitle)
+            .input('input_newIdea', sql.NVarChar(300), request.body.newIdea)
+            .query("UPDATE projects SET title = @input_newTitle, idea = @input_newIdea WHERE id = @input_projID")
+            return projUpdate.recordsets;
+        } else if (request.body.hasOwnProperty('newTitle')) {
+            let pool = await sql.connect(config);
+            let projUpdate = await pool.request()
+            .input('input_projID', sql.Int, request.body.projectID)
+            .input('input_newTitle', sql.NVarChar(100), request.body.newTitle)
+            .query("UPDATE projects SET title = @input_newTitle WHERE id = @input_projID")
+            return projUpdate.recordsets;
+        } else if (request.body.hasOwnProperty('newIdea')) {
+            let pool = await sql.connect(config);
+            let projUpdate = await pool.request()
+            .input('input_projID', sql.Int, request.body.projectID)
+            .input('input_newIdea', sql.NVarChar(300), request.body.newIdea)
+            .query("UPDATE projects SET idea = @input_newIdea WHERE id = @input_projID")
+            return projUpdate.recordsets;
+        }
+
+        return null;
+
+    } catch (err) {
+        console.log(err)
+        return null;
+    }
+}
+
+
+
+async function updateProjectUnSafe(request) {
+    try {
+
+        let queryString = ""
+
+        if (request.body.hasOwnProperty('newTitle') && request.body.hasOwnProperty('newIdea')) {
+            queryString = "UPDATE projects SET title = " + (request.body.newTitle) + ", idea = " + (request.body.newIdea) + " WHERE id = " + (request.body.projectID);
+        } else if (request.body.hasOwnProperty('newTitle')) {
+            //queryString = "UPDATE projects SET title = " + (request.body.newTitle) + " WHERE id = " + (request.body.projectID);
+            queryString = util.format("UPDATE projects SET title = '%s' WHERE id = %s", request.body.newTitle, request.body.projectID);
+            console.log(queryString)
+        } else if (request.body.hasOwnProperty('newIdea')) {
+            queryString = "UPDATE projects SET idea = " + (request.body.newIdea) + " WHERE id = " + (request.body.projectID);
+        }
+
+        let pool = await sql.connect(config);
+        let projUpdate = await pool.request()
+        .query(queryString)
+        return projUpdate.recordsets;
+
     } catch (err) {
         console.log(err)
         return null;
@@ -194,5 +260,7 @@ module.exports = {
     getProjectPic: getProjectPic,
     getUserProjects: getUserProjects,
     getProjectByID: getProjectByID,
-    getLikeCount: getLikeCount
+    getLikeCount: getLikeCount,
+    updateProject: updateProject,
+    updateProjectUnSafe: updateProjectUnSafe
 }

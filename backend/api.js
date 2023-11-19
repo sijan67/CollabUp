@@ -1,12 +1,10 @@
-//import User from './dbSchema/users.js'
-
 let userdb = require('./userOperations');
 let projdb = require('./projectOperations')
 let setup = require('./dbSetup');
 let {User} = require('./dbSchema/users');
 let {UserDetails} = require('./dbSchema/userDetails');
 let {UserPics} = require('./dbSchema/userPics');
-let {UserSkills} = require('./dbSchema/userSkills');
+//let {UserSkills} = require('./dbSchema/userSkills');
 let {UserProject} = require('./dbSchema/userProjects');
 let {Project} = require('./dbSchema/projects');
 let {ProjectPic} = require('./dbSchema/projectPics');
@@ -54,6 +52,19 @@ router.route('/setupDB').get((req, res) => {
         }
     })
     
+})
+
+
+router.route('/resetDB').get((req, res) => {
+    console.log('Resetting DB');
+
+    setup.resetdb().then((tables) => {
+        if (tables == null) {
+            res.status(500).send("DB Reset Error");
+        } else {
+            res.status(201).send("DB Reset Successfully");
+        }
+    })
 })
 
 //will return a list of all users in the system, including their passwords
@@ -131,6 +142,7 @@ router.route('/addUserDets').post((req, res) => {
     if (req.body.hasOwnProperty('username') && req.body.hasOwnProperty('birthdate') && req.body.hasOwnProperty('occupation') && req.body.hasOwnProperty('skill') && req.body.hasOwnProperty('experience') 
         && req.body.hasOwnProperty('location') && req.body.hasOwnProperty('worklink') && req.body.hasOwnProperty('pubemail') && req.body.hasOwnProperty('description') && req.body.hasOwnProperty('achievements')) {
     userdb.getUserByUsername(req.body.username).then((user) => {
+        
         if(user.length != 0) {
             const newUserDets = new UserDetails();
             newUserDets.id = user[0].id;
@@ -310,7 +322,8 @@ router.route('/getUserPic').get((req, res) => {
         if (user.length != 0) {
             userdb.getUserPic(user[0].id).then((userPic) => {
                 if (userPic.length != 0) {
-                    res.status(200).json(userPic[0].profPic);
+                    let base64 = userPic[0].profPic.toString('base64');
+                    res.status(200).json({ "profPic": base64});
                 } else {
                     res.status(404).send("No user pic found")
                 }
@@ -420,6 +433,71 @@ router.route('/likeProject').post((req, res) => {
 })
 
 
+
+router.route('/updateProject').post((req, res) => {
+    if (req.body.hasOwnProperty('username') && req.body.hasOwnProperty('projectID') && (req.body.hasOwnProperty('newTitle') || req.body.hasOwnProperty('newIdea'))) {
+        projdb.getProjectByID(req.body.projectID).then((project) => {
+            if (project == null) {
+                res.status(500).send("Project Update Failed")
+            } else if (project.length == 0) {
+                res.status(404).send("Project Not Found")
+            } else {
+                userdb.getUserByUsername(req.body.username).then((user) => {
+                    if (user == null || user.length == 0) {
+                        res.status(404).send("User not Found")
+                    } else if (user[0].id != project[0].ownerID) {
+                        res.status(400).send("User is not the owner of this project")
+                    } else {
+                        projdb.updateProject(req).then((data) => {
+                            if (data != null) {
+                                res.status(200).send("Project Successfully Updated")
+                            } else {
+                                res.status(500).send("Issue updating project")
+                            }
+                        })
+                    }
+                })
+            }
+        })
+    } else {
+        res.status(400).send("Malformatted Request. Improper request body")
+    }
+})
+
+
+
+router.route('/updateProjectUnsafe').post((req, res) => {
+    if (req.body.hasOwnProperty('username') && req.body.hasOwnProperty('projectID') && (req.body.hasOwnProperty('newTitle') || req.body.hasOwnProperty('newIdea'))) {
+        projdb.getProjectByID(req.body.projectID).then((project) => {
+            if (project == null) {
+                res.status(500).send("Project Update Failed")
+            } else if (project.length == 0) {
+                res.status(404).send("Project Not Found")
+            } else {
+                userdb.getUserByUsername(req.body.username).then((user) => {
+                    if (user == null || user.length == 0) {
+                        res.status(404).send("User not Found")
+                    } else if (user[0].id != project[0].ownerID) {
+                        res.status(400).send("User is not the owner of this project")
+                    } else {
+                        projdb.updateProjectUnSafe(req).then((data) => {
+                            if (data != null) {
+                                res.status(200).send("Project Successfully Updated")
+                            } else {
+                                res.status(500).send("Issue updating project")
+                            }
+                        })
+                    }
+                })
+            }
+        })
+    } else {
+        res.status(400).send("Malformatted Request. Improper request body")
+    }
+})
+
+
+
 //TODO: make this sorted by something, maybe sort reverse by project id?
 router.route('/getProjectList').get((req, res) => {
     projdb.getProjectList().then((projects) => {
@@ -497,7 +575,8 @@ router.route('/getProjectPic').get((req, res) => {
         projdb.getProjectPic(req.body.projectID).then((projPic) => {
             if (projPic != null) {
                 if (projPic.length != 0) {
-                    res.status(200).json(projPic);
+                    let base64 = userPic[0].profPic.toString('base64');
+                    res.status(200).json({ "projPic": base64 });
                 } else {
                     res.status(404).send("No Project Pic Found")
                 }
