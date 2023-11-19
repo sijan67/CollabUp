@@ -17,24 +17,27 @@ export const blurhash =
 
 export default function PostItem({ post }) {
   const navigation = useNavigation();
- 
 
   return (
     <Pressable
       style={styles.container}
     >
       <PostLeftSide {...post} />
-      <View style={{ flexShrink: 1, gap: 6 }}>
+      <View style={{ flexShrink: 1, gap: 6, flex: 1  }}>
         {/* Info about each post */}
         <PostHeading
           name={post.title}
-          verified={post.author.verified}
           createdAt={post.createdAt}
         />
+
+  
+        <Text>{String(post.content)}</Text>
         
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        
+        {/* <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
           <Text style={{ fontSize: 11, fontWeight: 600 }}>{post.author.name}</Text>
           <Text style={{ fontSize: 11, color: "gray" }}>{timeAgo(post.createdAt)} ago</Text>
+          <Text style={{ fontSize: 11, color: "gray" }}>.... ago</Text>
         </View>
         <View style={{flexDirection: 'row'}}>
           <Text style={{fontSize: 11,  fontWeight: 600}}>Related Skills</Text>
@@ -42,7 +45,7 @@ export default function PostItem({ post }) {
         </View>
         
         <Text>{post.content}</Text>
-        
+         */}
 
         {post.image && (
           <Image
@@ -92,16 +95,6 @@ function PostLeftSide(post) {
         }}
       >
 
-        {/* {[1, 2, 3].map((index) => (
-          <Image
-            key={index}
-            source={post.replies[index - 1]?.author.photo}
-            style={{ width: index * 7, height: index * 7, borderRadius: 15 }}
-            placeholder={blurhash}
-            contentFit="cover"
-            transition={500}
-          />
-        ))} */}
       </View>
     </View>
   );
@@ -168,6 +161,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 6,
     paddingBottom: 30,
+
+   
   },
   image: {
     width: 40,

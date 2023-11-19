@@ -18,8 +18,16 @@ export const PostProvider = ({ children }) => {
     setPosts(newPosts);
   };
 
+  const uploadPosts = (newPost) => {
+    // Prepend the new post to the existing posts array
+    setPosts((prevPosts) => [newPost, ...prevPosts]);
+
+    console.log("newPost is: ", newPost)
+    
+  };
+
   return (
-    <PostContext.Provider value={{ posts, updatePosts }}>
+    <PostContext.Provider value={{ posts, updatePosts, uploadPosts }}>
       {children}
     </PostContext.Provider>
   );
