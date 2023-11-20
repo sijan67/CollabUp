@@ -1,29 +1,37 @@
 import {StyleSheet} from 'react-native';
-
 export default StyleSheet.create({
     container: {
         backgroundColor: '#B3D8E9',
-        alignItems:'center', 
-        justifyContent:'center', 
-        flex:1,
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    image: {
-        top: -50
+    createAccountContainer: {
+        marginTop: 30
     },
-    welcomeHeaderText: {
-        fontFamily: 'PlayfairDisplay_400Regular',
-        fontSize: 57,
-        marginTop: 15,
-        top: -50
-    },
-    welcomeDescriptionText: {
-        fontFamily: 'Nobile_400Regular',
-        fontSize: 16,
-        marginTop: 15,
+    textHeader: {
+        fontSize: 40,
+        fontFamily: 'Raleway_700Bold',
         width: '80%',
-        top: -50
     },
-    joinNowButton: {
+    textDescription: {
+        fontSize: 15,
+        fontFamily: 'Nobile_400Regular',
+        width: 346,
+        marginTop: 20
+    },
+    textInput: {
+        borderWidth: 2,
+        borderRadius: 5,
+        borderColor: 'black',
+        width: 346,
+        height: 53,
+        fontFamily: 'Nobile_400Regular',
+        fontSize: 17,
+        padding: 15,
+        marginTop: 10
+    },
+    button: {
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#2D2A29',
@@ -31,12 +39,12 @@ export default StyleSheet.create({
         width: 346,
         height: 51,
         marginTop: 40,
-        top: -50
+        marginBottom: 10
     },
-    joinNowButtonText: {
+    buttonText: {
         fontFamily: 'Nobile_400Regular',
         fontSize: 20,
-        color: 'white'
+        color: 'white',
     },
     haveAccountText: {
         fontFamily: 'Nobile_400Regular',
