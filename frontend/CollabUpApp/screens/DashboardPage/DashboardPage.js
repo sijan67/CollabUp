@@ -20,6 +20,7 @@ import * as FileSystem from 'expo-file-system';
 // import { PostItem  } from "../../components/PostItem";
 import { usePostContext } from "../../context/post-context";
 import PostItem from "../../components/PostItem";
+import { generatePostsFromAPI } from "../../utils/backend-data";
 
 export default function Dashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -32,15 +33,22 @@ export default function Dashboard() {
     //  additional logic we need can be placed here
   }, []);
 
-  const handleRefresh = () => {
+
+  const handleRefresh = async () => {
     // Set the refreshing state to true to show the loading indicator
     setIsRefreshing(true);
-
-    // Add  refresh logic here
-    // we fetch new data or perform any async operation
-
-    // After completing the refresh operation, set refreshing to false
-    setIsRefreshing(false);
+  
+    try {
+      // Fetch new posts from the API
+      const newPosts = await generatePostsFromAPI();
+      updatePosts(newPosts);
+    } catch (error) {
+      //  error if the API call fails
+      console.error('Error fetching new posts:', error);
+    } finally {
+      // after completing the refresh operation, set refreshing to false
+      setIsRefreshing(false);
+    }
   };
 
   const pickImage = async () => {
