@@ -1,23 +1,5 @@
 import { faker } from "@faker-js/faker";
 
-export function createRandomFollower() {
-  const firstName = faker.person.firstName();
-  const lastName = faker.person.lastName();
-  const name = firstName + " " + lastName;
-
-  return {
-    id: faker.string.uuid(),
-    photo: faker.image.avatar(),
-    name,
-    skills: faker.person.bio(),
-    verified: Math.random() >= 0.5,
-    bio: faker.person.bio(),
-    username: faker.internet.userName(),
-    link: faker.internet.url(),
-  };
-}
-
-
 // Needed data for post 
 export function createRandomUser() {
   const firstName = faker.person.firstName();

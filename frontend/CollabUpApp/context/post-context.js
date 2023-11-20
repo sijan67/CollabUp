@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { generatePosts } from "../utils/generate-dommy-data";
+import {generatePostsFromAPI} from "../utils/backend-data";
 
 const PostContext = createContext();
 
@@ -11,7 +12,10 @@ export const PostProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    setPosts(generatePosts());
+    // setPosts(generatePosts());
+
+    generatePostsFromAPI().then(posts => setPosts(posts));
+
   }, []);
 
   const updatePosts = (newPosts) => {

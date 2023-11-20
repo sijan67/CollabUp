@@ -31,13 +31,12 @@ export default function PostItem({ post }) {
         />
 
   
-        <Text>{String(post.content)}</Text>
+        {/* <Text>{String(post.content)}</Text> */}
         
         
-        {/* <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
           <Text style={{ fontSize: 11, fontWeight: 600 }}>{post.author.name}</Text>
           <Text style={{ fontSize: 11, color: "gray" }}>{timeAgo(post.createdAt)} ago</Text>
-          <Text style={{ fontSize: 11, color: "gray" }}>.... ago</Text>
         </View>
         <View style={{flexDirection: 'row'}}>
           <Text style={{fontSize: 11,  fontWeight: 600}}>Related Skills</Text>
@@ -45,7 +44,7 @@ export default function PostItem({ post }) {
         </View>
         
         <Text>{post.content}</Text>
-         */}
+        
 
         {post.image && (
           <Image

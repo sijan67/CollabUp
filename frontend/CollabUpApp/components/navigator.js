@@ -41,12 +41,12 @@ function Home() {
               <MaterialCommunityIcons name="home" color={color} size={26}/>
             ),
         }}/>
-        <Tab.Screen name="Interaction" component={Interaction}
+        {/* <Tab.Screen name="Interaction" component={Interaction}
           options={{
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="arrow-left-right-bold" color={color} size={26}/>
             ),
-        }}/>
+        }}/> */}
         <Tab.Screen name="Profile" component={Profile}
           options={{
             tabBarIcon: ({ color, size }) => (

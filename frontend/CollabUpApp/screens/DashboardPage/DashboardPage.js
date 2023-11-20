@@ -66,47 +66,73 @@ export default function Dashboard() {
     }
   };
 
-  const handleCreatePost = () => {
+  const sendPostRequest = async (postData) => {
+
+    try {
+      const response = await fetch('https://collabup.loca.lt/addNewProject', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: 'admin',
+          projTitle: postData.title,
+          projIdea: postData.content,
+          timeCreated: new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        // handle  error based on the response status
+        console.error('Error:', response.status, response.statusText);
+        return false; // request not successful
+      }
+
+      return true; // Request was successful
+    } catch (error) {
+      // handle network-related errors
+      console.error('Network error:', error.message);
+      return false; // request not successful
+    }
+  };
+
+
+  const handleCreatePost = async() => {
     // Add logic to create a new post
 
-    // TO DO : Add logic here 
+    // TO DO : Add logic here to make post 
     // addPost(newPost);
 
     const { title, skills, idea, image, author } = newPost;
 
-    const newPostObject = {
-      // id: posts.length + 1, // You may need to adjust the way you generate IDs
-      // title: "check",
-      // skills: "check",
-      // idea: "check",
-      // image: "check",
-      // author: {
-      //   id: 1, // Assuming author information is part of the newPost state
-      //   name: "check",
-      //   photo: "pic",
-      //   skills: "skills",
-      // },
-      
-      
+    const newPostObject = { 
       "author":{
-          "id":"3d25f77b-0dfa-4459-abe2-7c50bd46bfe9",
+          // "id":"3d25f77b-0dfa-4459-abe2-7c50bd46bfe9",
           "name":"Florence Parisian",
           "photo":"https://avatars.githubusercontent.com/u/60666922",
           "skills": skills
       },
       "content": idea,
-      "createdAt": "2023-11-18T20:16:02.650Z",
+      "createdAt":new Date().toISOString(), // use the current date and time
       "id": posts.length + 1, // id should be received back from api ? or check if this is fine
-      "image":"https://avatars.githubusercontent.com/u/60666922",
+      "image":"https://avatars.githubusercontent.com/u/60666922", // change this to actual base64, should encode and decode it 
       "likesCount":0,
       "title":title
-
     };
 
-    // Update the posts array by adding the new post
-    uploadPosts(newPostObject);
+    // Call the asynchronous function to make the POST request
+    const success = await sendPostRequest(newPostObject);
 
-    // Reset the newPost state after creating a post
+    // Update the posts array only if the request was successful
+    if (success) {
+      uploadPosts(newPostObject);
+
+    } else {
+      // on error making posts currently having error 
+      console.error('Failed to create post.');
+    }
+
+    // reset the newPost state after creating a post
     setNewPost({ title: '', skills: '', idea: '', image: '' });
     setImage(null)
   };
