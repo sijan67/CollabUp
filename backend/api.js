@@ -17,8 +17,8 @@ let app = express();
 let router = express.Router();
 
 
-app.use(bodyParser.urlencoded({ extended: true}));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true}));
+app.use(bodyParser.json({limit: '50mb'}));
 app.use(cors());
 app.use('/', router);
 
@@ -83,10 +83,10 @@ router.route('/users').get((req, res) => {
 ///////////////////////////// User Creation and Login ///////////////////////////////
 
 //Login method
-router.route('/login').get((req, res) => {
-    if(req.body.hasOwnProperty('loginName') && req.body.hasOwnProperty('password')) {
-    let loginUsername = req.body.loginName;
-    let loginPassword = req.body.password;  
+router.route('/login/:loginName/pswd/:password').get((req, res) => {
+    if(req.params.hasOwnProperty('loginName') && req.params.hasOwnProperty('password')) {
+    let loginUsername = req.params.loginName;
+    let loginPassword = req.params.password;  
 
     userdb.getPassFromLogin(loginUsername).then((digest) => {
         if ((digest != null)) {
@@ -232,9 +232,9 @@ router.route('/addUserSkill').post((req, res) => {
 ////////////////////////////// User GET Endpoints //////////////////////////
 
 //Gets a user's info by their username, will not return password
-router.route('/getUser').get((req, res) => {
-    if (req.body.hasOwnProperty('username')) {
-    userdb.getUserByUsername(req.body.username).then((user) => {
+router.route('/getUser/:username').get((req, res) => {
+    if (req.params.hasOwnProperty('username')) {
+    userdb.getUserByUsername(req.params.username).then((user) => {
         if (user.length != 0) {
             res.status(200).json({
                 id: user[0].id,
@@ -255,9 +255,9 @@ router.route('/getUser').get((req, res) => {
  
 
 //Gets a user's info by their userID, will not return password
-router.route('/getUserByID').get((req, res) => {
-    if (req.body.hasOwnProperty('id')) {
-    userdb.getUserByID(req.body.id).then((data) => {
+router.route('/getUserByID/:id').get((req, res) => {
+    if (req.params.hasOwnProperty('id')) {
+    userdb.getUserByID(req.params.id).then((data) => {
         if (data.length != 0) {
             res.status(200).json({
                 id: data[0].id,
@@ -278,9 +278,9 @@ router.route('/getUserByID').get((req, res) => {
 
 
 //Gets a user's user details by their username
-router.route('/getUserDets').get((req, res) => {
-    if (req.body.hasOwnProperty('username')) {
-    userdb.getUserDetsByUsername(req.body.username).then((userDets) => {
+router.route('/getUserDets/:username').get((req, res) => {
+    if (req.params.hasOwnProperty('username')) {
+    userdb.getUserDetsByUsername(req.params.username).then((userDets) => {
         if (userDets.length != 0 ) {
             res.status(200).json(userDets[0]);
         } else {
@@ -316,12 +316,12 @@ router.route('/getUserSkills').get((req, res) => {
 */
 
 //Gets a user's profile pic
-router.route('/getUserPic').get((req, res) => {
-    if (req.body.hasOwnProperty('username')) {
-    userdb.getUserByUsername(req.body.username).then((user) => {
+router.route('/getUserPic/:username').get((req, res) => {
+    if (req.params.hasOwnProperty('username')) {
+    userdb.getUserByUsername(req.params.username).then((user) => {
         if (user.length != 0) {
             userdb.getUserPic(user[0].id).then((userPic) => {
-                if (userPic.length != 0) {
+                if (userPic.length != 0 && userPic[0].profPic != null) {
                     let base64 = userPic[0].profPic.toString('base64');
                     res.status(200).json({ "profPic": base64});
                 } else {
@@ -514,9 +514,9 @@ router.route('/getProjectList').get((req, res) => {
 })
 
 
-router.route('/getProjectByID').get((req, res) => {
-    if (req.body.hasOwnProperty('projectID')) {
-        projdb.getProjectByID(req.body.projectID).then((project) => {
+router.route('/getProjectByID/:projectID').get((req, res) => {
+    if (req.params.hasOwnProperty('projectID')) {
+        projdb.getProjectByID(req.params.projectID).then((project) => {
             if (project != null) {
                 if (project.length != 0) {
                     res.status(200).json(project[0]);
@@ -536,9 +536,9 @@ router.route('/getProjectByID').get((req, res) => {
 
 
 
-router.route('/getProjLikeCount').get((req, res) => {
-    if (req.body.hasOwnProperty('projectID')) {
-        projdb.getLikeCount(req.body.projectID).then((likeCount) => {
+router.route('/getProjLikeCount/:projectID').get((req, res) => {
+    if (req.params.hasOwnProperty('projectID')) {
+        projdb.getLikeCount(req.params.projectID).then((likeCount) => {
             if (likeCount != null) {
                 res.status(200).json(likeCount[0]);
             } else {
@@ -551,9 +551,9 @@ router.route('/getProjLikeCount').get((req, res) => {
 })
 
 
-router.route('/getProjectSkills').get((req, res) => {
-    if (req.body.hasOwnProperty('projectID')) {
-        projdb.getProjectSkills(req.body.projectID).then((projSkills) => {
+router.route('/getProjectSkills/:projectID').get((req, res) => {
+    if (req.params.hasOwnProperty('projectID')) {
+        projdb.getProjectSkills(req.params.projectID).then((projSkills) => {
             if (projSkills != null) {
                 if (projSkills.length != 0) {
                     res.status(200).json(projSkills);
@@ -570,12 +570,12 @@ router.route('/getProjectSkills').get((req, res) => {
 })
 
 
-router.route('/getProjectPic').get((req, res) => {
-    if(req.body.hasOwnProperty('projectID')){
-        projdb.getProjectPic(req.body.projectID).then((projPic) => {
+router.route('/getProjectPic/:projectID').get((req, res) => {
+    if(req.params.hasOwnProperty('projectID')){
+        projdb.getProjectPic(req.params.projectID).then((projPic) => {
             if (projPic != null) {
-                if (projPic.length != 0) {
-                    let base64 = userPic[0].profPic.toString('base64');
+                if (projPic.length != 0 && projPic[0].projPic != null) {
+                    let base64 = projPic[0].projPic.toString('base64');
                     res.status(200).json({ "projPic": base64 });
                 } else {
                     res.status(404).send("No Project Pic Found")
@@ -587,12 +587,12 @@ router.route('/getProjectPic').get((req, res) => {
     } else {
         res.status(400).send("Malformatted Request. Improper request body")
     }
-})
+}) 
 
 
-router.route('/getUserProjects').get((req, res) => {
-    if (req.body.hasOwnProperty('username')) {
-        userdb.getUserByUsername(req.body.username).then((user) => {
+router.route('/getUserProjects/:username').get((req, res) => {
+    if (req.params.hasOwnProperty('username')) {
+        userdb.getUserByUsername(req.params.username).then((user) => {
             if (user.length != 0) {
                 projdb.getUserProjects(user[0].id).then((userProjects) => {
                     if (userProjects != null) {
