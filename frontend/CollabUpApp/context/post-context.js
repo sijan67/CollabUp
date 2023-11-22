@@ -26,7 +26,7 @@ export const PostProvider = ({ children }) => {
     // Prepend the new post to the existing posts array
     setPosts((prevPosts) => [newPost, ...prevPosts]);
 
-    console.log("newPost is: ", newPost)
+    // console.log("newPost is: ", newPost)
     
   };
 

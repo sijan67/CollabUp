@@ -65,17 +65,15 @@ export default function Dashboard() {
     if (!result.canceled) {
       const base64 = await FileSystem.readAsStringAsync(result.uri, { encoding: 'base64' });
       
-      // console log base64 encoding
-      // console.log(base64)
-                 
-      // need to change this to base64
-      setImage(result.assets[0].uri);
-      setNewPost({ ...newPost, image: result.assets[0].uri });
+ 
+      setImage(`data:image/png;base64,${base64}`);
+      // setNewPost({ ...newPost, image: result.assets[0].uri });
+      setNewPost({ ...newPost, image: `data:image/png;base64,${base64}` });
     }
   };
 
-  const sendPostRequest = async (postData) => {
 
+  const sendPostRequest = async (postData) => {
     try {
       const response = await fetch('https://collabup.loca.lt/addNewProject', {
         method: 'POST',
@@ -83,19 +81,55 @@ export default function Dashboard() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: 'admin',
+          username: 'admin', // make this dynamic
           projTitle: postData.title,
           projIdea: postData.content,
           timeCreated: new Date().toISOString(),
         }),
       });
-
+  
       if (!response.ok) {
         // handle  error based on the response status
         console.error('Error:', response.status, response.statusText);
         return false; // request not successful
       }
+  
+      // Assuming the response contains the project ID
+      const responseData = await response.json();
+      const projectId = responseData.projectID;
+  
+      // Call the function to post the picture
+      const success = await sendPicture(projectId, postData.image);
+  
+      return success;
+    } catch (error) {
+      // handle network-related errors
+      console.error('Network error:', error.message);
+      return false; // request not successful
+    }
+  };
+  
+  const sendPicture = async (projectId, image) => {
+    try {
+      const response = await fetch('https://collabup.loca.lt/addProjectPic', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          projectID: projectId,
+          projPic: image,
+        }),
+      });
+  
+      if (!response.ok) {
+        // handle error based on the response status
+        console.error('Error:', response.status, response.statusText);
+        return false; // request not successful
+      }
 
+      console.log("POST image successful")
+  
       return true; // Request was successful
     } catch (error) {
       // handle network-related errors
@@ -103,6 +137,9 @@ export default function Dashboard() {
       return false; // request not successful
     }
   };
+  
+
+  
 
 
   const handleCreatePost = async() => {
@@ -116,14 +153,14 @@ export default function Dashboard() {
     const newPostObject = { 
       "author":{
           // "id":"3d25f77b-0dfa-4459-abe2-7c50bd46bfe9",
-          "name":"Florence Parisian",
+          "name":"admin", // Make this dynamic
           "photo":"https://avatars.githubusercontent.com/u/60666922",
           "skills": skills
       },
       "content": idea,
       "createdAt":new Date().toISOString(), // use the current date and time
       "id": posts.length + 1, // id should be received back from api ? or check if this is fine
-      "image":"https://avatars.githubusercontent.com/u/60666922", // change this to actual base64, should encode and decode it 
+      "image":image,  
       "likesCount":0,
       "title":title
     };
