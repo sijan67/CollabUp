@@ -81,7 +81,7 @@ export default function Dashboard() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: 'admin', // make this dynamic
+          username: 'siju', // make this dynamic
           projTitle: postData.title,
           projIdea: postData.content,
           timeCreated: new Date().toISOString(),
@@ -153,8 +153,8 @@ export default function Dashboard() {
     const newPostObject = { 
       "author":{
           // "id":"3d25f77b-0dfa-4459-abe2-7c50bd46bfe9",
-          "name":"admin", // Make this dynamic
-          "photo":"https://avatars.githubusercontent.com/u/60666922",
+          "name":"siju", // Make this dynamic
+          "photo":"https://avatars.githubusercontent.com/u/60666922", // make this dynamic
           "skills": skills
       },
       "content": idea,
