@@ -34,6 +34,33 @@ async function addProject(newProj) {
 }
 
 
+async function addProjectUnsafe(newProj) {
+    try {
+        let newProjID = await getNextPrimaryID("projects");
+
+        let newUserProjID = await getNextPrimaryID("userProjects");
+        
+        let queryString = "INSERT INTO projects (id, ownerID, title, idea, timeCreated) VALUES (" + (newProjID) + ", " + (newProj.ownerID) + ", '" + (newProj.title) + "', '" + (newProj.idea) + "', '" + (newProj.timeCreated) + "')"
+        //console.log(queryString)
+        let pool = await sql.connect(config);
+        let insertProject = await pool.request()
+        .query(queryString)
+        
+        let insertUserProj = await pool.request()
+        .input('input_id', sql.Int, newUserProjID)
+        .input('input_userID', sql.Int, newProj.ownerID)
+        .input('input_projectID', sql.Int, newProjID)
+        .input('input_created', sql.Int, 1)
+        .query("INSERT INTO userProjects (id, userID, projID, created) VALUES (@input_id, @input_userID, @input_projectID, @input_created)")
+        return newProjID;
+
+    } catch (err) {
+        console.log(err)
+        return null;
+    }
+}
+
+
 async function addProjectPic(newPic) {
     try {
         let newPicID = await getNextPrimaryID("projectPics");
@@ -262,5 +289,6 @@ module.exports = {
     getProjectByID: getProjectByID,
     getLikeCount: getLikeCount,
     updateProject: updateProject,
-    updateProjectUnSafe: updateProjectUnSafe
+    updateProjectUnSafe: updateProjectUnSafe,
+    addProjectUnsafe: addProjectUnsafe
 }

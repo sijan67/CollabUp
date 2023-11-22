@@ -370,6 +370,32 @@ router.route('/addNewProject').post((req, res) => {
 })
 
 
+router.route('/addProjectUnsafe').post((req, res) => {
+    if (req.body.hasOwnProperty('username') && req.body.hasOwnProperty('projTitle') && req.body.hasOwnProperty('projIdea') && req.body.hasOwnProperty('timeCreated')) {
+        userdb.getUserByUsername(req.body.username).then((user) => {
+            if (user.length != 0) {
+                const newProj = new Project();
+                newProj.ownerID = user[0].id;
+                newProj.title = req.body.projTitle;
+                newProj.idea = req.body.projIdea;
+                newProj.timeCreated = req.body.timeCreated;
+                projdb.addProjectUnsafe(newProj).then((data) => {
+                    if (data != null) {
+                        res.status(201).json({"projectID" : data})
+                    } else {
+                        res.status(500).send("Project creation failed")
+                    }
+                })
+            } else {
+                res.status(404).send("User not found")
+            }
+        })
+    } else {
+        res.status(400).send('Malformatted Request. Improper request body')
+    }
+})
+
+
 router.route('/addProjectPic').post((req, res) => {
     if (req.body.hasOwnProperty('projectID') && req.body.hasOwnProperty('projPic')) {
         const newPic = new ProjectPic();
