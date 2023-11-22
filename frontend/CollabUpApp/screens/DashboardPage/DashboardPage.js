@@ -11,6 +11,7 @@ import {
   Button,
   View,
   Image,
+  Switch,
   TouchableHighlight
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -21,12 +22,19 @@ import * as FileSystem from 'expo-file-system';
 import { usePostContext } from "../../context/post-context";
 import PostItem from "../../components/PostItem";
 import { generatePostsFromAPI } from "../../utils/backend-data";
+import { useUserContext } from "../../context/user-context";
+import { LogBox } from 'react-native';
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs();//Ignore all log notifications
 
 export default function Dashboard() {
+  const [user, setUser] = useUserContext()
+
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { posts, updatePosts, uploadPosts } = usePostContext();
   const [newPost, setNewPost] = useState({ title: '', skills: '', idea: '', image: '' });
   const [image, setImage] = useState(null);
+  const [isSafe, setIsSafe] = useState(true);
 
 
   useEffect(() => {
@@ -74,14 +82,19 @@ export default function Dashboard() {
 
 
   const sendPostRequest = async (postData) => {
+
+    const endpoint = isSafe
+        ? 'https://collabup.loca.lt/addNewProject'
+        : 'https://collabup.loca.lt/addProjectUnsafe';
+
     try {
-      const response = await fetch('https://collabup.loca.lt/addNewProject', {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: 'siju', // make this dynamic
+          username: user, // make this dynamic
           projTitle: postData.title,
           projIdea: postData.content,
           timeCreated: new Date().toISOString(),
@@ -153,7 +166,7 @@ export default function Dashboard() {
     const newPostObject = { 
       "author":{
           // "id":"3d25f77b-0dfa-4459-abe2-7c50bd46bfe9",
-          "name":"siju", // Make this dynamic
+          "name":user, // Make this dynamic
           "photo":"https://avatars.githubusercontent.com/u/60666922", // make this dynamic
           "skills": skills
       },
@@ -203,6 +216,17 @@ export default function Dashboard() {
           />
         }
       >
+         {/* Toggle button for Safe/Unsafe */}
+         <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 10 }}>
+          <Text style={{ marginRight: 10 }}>Safe</Text>
+          <Switch
+            value={isSafe}
+            onValueChange={() => setIsSafe(!isSafe)}
+            trackColor={{false: '#767577', true: '#81b0ff'}}
+          />
+          <Text style={{ marginLeft: 10 }}>Unsafe</Text>
+        </View>
+
         {isRefreshing && <ActivityIndicator size="large" color="#0000ff" />}
       
         <View style={{backgroundColor: "#D9E2E7", borderRadius: 30, padding: 20, margin: 10}}>
