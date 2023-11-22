@@ -1,4 +1,4 @@
-import React from "react";
+import React , {useState} from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { Text } from "./Themed";
@@ -17,6 +17,73 @@ export const blurhash =
 
 export default function PostItem({ post }) {
   const navigation = useNavigation();
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(post.likesCount); 
+
+
+
+const updateLikeCount = async (projectId, username, isLiked) => {
+  const apiUrl = "https://collabup.loca.lt/likeProject";
+
+  console.log(JSON.stringify({
+    username: username,
+    projectID: projectId,
+  }));
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: username,
+        projectID: projectId,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update like count: ${response.statusText}`);
+    }
+
+    // Check if the status code is 200
+    if (response.ok) {
+      console.log('Successfully updated the like count');
+      return true; // Update was successful
+    } else {
+      console.warn('Update like count unsuccessful');
+      return false; // Update was unsuccessful
+    }
+  } catch (error) {
+    console.error("Error updating like count:", error);
+    throw error;
+  }
+};
+
+
+
+
+  const handleLikePress = async () => {
+    // Toggle the like status
+    setIsLiked(!isLiked);
+
+    // Update like count on the backend
+    try {
+      // TO DO: make username dynamic 
+
+      const updatedLikeCount = await updateLikeCount(post.id, "admin", !isLiked);
+
+      if (updatedLikeCount) {
+        // Update the like count state
+        setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
+      }
+      
+    } catch (error) {
+      console.error("Error updating like count:", error);
+    }
+
+  };
+
 
   return (
     <Pressable
@@ -56,9 +123,16 @@ export default function PostItem({ post }) {
           />
         )}
 
-   
-        <BottomIcons />
-        <PostFooter replies={post.repliesCount} likes={post.likesCount} />
+  
+        {/* <PostFooter replies={post.repliesCount} likes={post.likesCount} />
+         */}
+
+        <PostFooter
+                isLiked={isLiked}
+                onLikePress={handleLikePress}
+                replies={post.repliesCount}
+                likes={likesCount}
+              />
       </View>
       
     </Pressable>
@@ -112,48 +186,37 @@ export function PostHeading({ name, createdAt, verified }) {
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
         <Text style={{ fontWeight: "500" }}>{name}</Text>
-        {/* {verified && (
-          <MaterialIcons name="verified" size={14} color="#60a5fa" />
-        )} */}
       </View>
-      {/* <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-      <Text style={{ color: "gray" }}> by {name}</Text>
-        <Text style={{ color: "gray" }}>{timeAgo(createdAt)} ago</Text>
-      </View> */}
+     
     </View>
   );
 }
 
-export function PostFooter({ replies, likes }) {
+
+
+export function PostFooter({ isLiked, onLikePress, replies, likes }) {
   const iconSize = 20;
-  const iconColor = "black"; 
-
-  return (
-
-    <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-  
-    <FontAwesome name="heart-o" size={iconSize} color={iconColor} />
-    <Text style={{ color: "gray" }}>
-       {likes} likes 
-    </Text>
-
-  </View>
-
-   
-  );
-}
-
-export function BottomIcons() {
-  const iconSize = 20;
-  const iconColor = "black"; // Adjust icon color as needed
+  const iconColor = isLiked ? "red" : "black"; // Change color based on like status
 
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-      {/* <FontAwesome name="heart-o" size={iconSize} color={iconColor} /> */}
-      {/* <Ionicons name="chatbubble-outline" size={iconSize} color={iconColor} /> */}
+      <FontAwesome
+        name={isLiked ? "heart" : "heart-o"}
+        size={iconSize}
+        color={iconColor}
+        onPress={() => {
+          onLikePress();
+          if (isLiked) {
+            // Increment likes if it was liked
+            // setLikes(likes + 1);
+          }
+        }}
+      />
+      <Text style={{ color: "gray" }}>{likes} likes</Text>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { generatePosts } from "../utils/generate-dommy-data";
+// import { generatePosts } from "../utils/generate-dommy-data";
 import {generatePostsFromAPI} from "../utils/backend-data";
 
 const PostContext = createContext();
