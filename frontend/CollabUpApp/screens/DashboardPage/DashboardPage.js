@@ -75,6 +75,7 @@ export default function Dashboard() {
       
  
       setImage(`data:image/png;base64,${base64}`);
+      
       // setNewPost({ ...newPost, image: result.assets[0].uri });
       setNewPost({ ...newPost, image: `data:image/png;base64,${base64}` });
     }
@@ -83,9 +84,12 @@ export default function Dashboard() {
 
   const sendPostRequest = async (postData) => {
 
-    const endpoint = isSafe
+    const endpoint = !isSafe
         ? 'https://collabup.loca.lt/addNewProject'
         : 'https://collabup.loca.lt/addProjectUnsafe';
+
+    
+    console.log("sending post request to : ", endpoint)
 
     try {
       const response = await fetch(endpoint, {
@@ -111,6 +115,8 @@ export default function Dashboard() {
       const responseData = await response.json();
       const projectId = responseData.projectID;
   
+      console.log('postData.image:', postData.image.substring(0, 100));
+
       // Call the function to post the picture
       const success = await sendPicture(projectId, postData.image);
   

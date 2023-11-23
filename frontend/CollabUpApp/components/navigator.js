@@ -55,12 +55,12 @@ function Home() {
               <MaterialCommunityIcons name="arrow-left-right-bold" color={color} size={26}/>
             ),
         }}/> */}
-        <Tab.Screen name="Profile" component={Profile}
+        {/* <Tab.Screen name="Profile" component={Profile}
           options={{
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="account" color={color} size={26}/>
             ),
-        }}/>
+        }}/> */}
     </Tab.Navigator>
   )
 }
