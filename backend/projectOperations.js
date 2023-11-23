@@ -159,20 +159,15 @@ async function updateProject(request) {
 
 async function updateProjectUnSafe(request) {
     try {
-        console.log("using unsafe endpoint")
         let queryString = ""
 
         if (request.body.hasOwnProperty('newTitle') && request.body.hasOwnProperty('newIdea')) {
             queryString = "UPDATE projects SET title = " + (request.body.newTitle) + ", idea = " + (request.body.newIdea) + " WHERE id = " + (request.body.projectID);
         } else if (request.body.hasOwnProperty('newTitle')) {
-            //queryString = "UPDATE projects SET title = " + (request.body.newTitle) + " WHERE id = " + (request.body.projectID);
             queryString = util.format("UPDATE projects SET title = '%s' WHERE id = %s", request.body.newTitle, request.body.projectID);
-            console.log(queryString)
         } else if (request.body.hasOwnProperty('newIdea')) {
             queryString = "UPDATE projects SET idea = " + (request.body.newIdea) + " WHERE id = " + (request.body.projectID);
         }
-
-        console.log(queryString)
         let pool = await sql.connect(config);
         let projUpdate = await pool.request()
         .query(queryString)
