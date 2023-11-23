@@ -11,6 +11,7 @@ import DateOfBirth from '../screens/DateOfBirthPage/DateOfBirthPage';
 import PersonalDetails1 from '../screens/PersonalDetails1Page/PersonalDetails1Page';
 import PersonalDetails2 from '../screens/PersonalDetails2Page/PersonalDetails2Page';
 import UploadPicture from '../screens/UploadPicturesPage/UploadPicturePage';
+import { PostProvider } from '../context/post-context';
 
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -47,18 +48,18 @@ function Home() {
               <MaterialCommunityIcons name="home" color={color} size={26}/>
             ),
         }}/>
-        <Tab.Screen name="Interaction" component={Interaction}
+        {/* <Tab.Screen name="Interaction" component={Interaction}
           options={{
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="arrow-left-right-bold" color={color} size={26}/>
             ),
-        }}/>
-        <Tab.Screen name="Profile" component={Profile}
+        }}/> */}
+        {/* <Tab.Screen name="Profile" component={Profile}
           options={{
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="account" color={color} size={26}/>
             ),
-        }}/>
+        }}/> */}
     </Tab.Navigator>
   )
 }
@@ -67,6 +68,7 @@ export default function Navigator() {
   return (
   <NavigationContainer>
     <PaperProvider theme={theme}>
+      <PostProvider>
       <Stack.Navigator>
         <Stack.Screen name="Welcome" component={Welcome} options={{headerShown: false}}/>
         <Stack.Screen name="Login" component={Login} options={{headerShown: false}}/>
@@ -79,6 +81,7 @@ export default function Navigator() {
               headerShown: false, // Hide the title of the Home screen
             }}/>
       </Stack.Navigator>
+      </PostProvider>
   </PaperProvider>
   </NavigationContainer>
   );
