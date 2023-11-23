@@ -180,7 +180,7 @@ router.route('/addUserPic').post((req, res) => {
         if(user.length != 0) {
             const newUserPic = new UserPics();
             newUserPic.userID = user[0].id;
-            newUserPic.profPic = req.body.profPic;
+            newUserPic.profPic = req.body.profPic.substring(req.body.profPic.indexOf(',') + 1);
             userdb.addUserPic(newUserPic).then((data) => {
                 if (data != null) {
                     res.status(201).send('User Pic successfully stored');
@@ -323,7 +323,10 @@ router.route('/getUserPic/:username').get((req, res) => {
             userdb.getUserPic(user[0].id).then((userPic) => {
                 if (userPic.length != 0 && userPic[0].profPic != null) {
                     let base64 = userPic[0].profPic.toString('base64');
-                    res.status(200).json({ "profPic": base64});
+                    let pngTag = "data:image/png;base64,"
+                    let picToSend = pngTag + base64;
+
+                    res.status(200).json({ "profPic": picToSend});
                 } else {
                     res.status(404).send("No user pic found")
                 }
@@ -400,7 +403,7 @@ router.route('/addProjectPic').post((req, res) => {
     if (req.body.hasOwnProperty('projectID') && req.body.hasOwnProperty('projPic')) {
         const newPic = new ProjectPic();
         newPic.projID = req.body.projectID;
-        newPic.projPic = req.body.projPic;
+        newPic.projPic = req.body.projPic.substring(req.body.projPic.indexOf(',') + 1);
         projdb.addProjectPic(newPic).then((data) => {
             if (data != null) {
                 res.status(201).send("Project Pic successfully added")
@@ -602,7 +605,10 @@ router.route('/getProjectPic/:projectID').get((req, res) => {
             if (projPic != null) {
                 if (projPic.length != 0 && projPic[0].projPic != null) {
                     let base64 = projPic[0].projPic.toString('base64');
-                    res.status(200).json({ "projPic": base64 });
+                    let pngTag = "data:image/png;base64,"
+                    let picToSend = pngTag + base64;
+
+                    res.status(200).json({ "projPic": picToSend });
                 } else {
                     res.status(404).send("No Project Pic Found")
                 }

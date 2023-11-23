@@ -6,6 +6,7 @@ const util = require('util');
 
 async function addProject(newProj) {
     try {
+        console.log("Safe Endpoint")
         let newProjID = await getNextPrimaryID("projects");
 
         let newUserProjID = await getNextPrimaryID("userProjects");
@@ -36,12 +37,13 @@ async function addProject(newProj) {
 
 async function addProjectUnsafe(newProj) {
     try {
+        console.log("Unsafe Endpoint")
         let newProjID = await getNextPrimaryID("projects");
 
         let newUserProjID = await getNextPrimaryID("userProjects");
         
         let queryString = "INSERT INTO projects (id, ownerID, title, idea, timeCreated) VALUES (" + (newProjID) + ", " + (newProj.ownerID) + ", '" + (newProj.title) + "', '" + (newProj.idea) + "', '" + (newProj.timeCreated) + "')"
-        //console.log(queryString)
+        console.log(queryString)
         let pool = await sql.connect(config);
         let insertProject = await pool.request()
         .query(queryString)
@@ -120,6 +122,7 @@ async function likeProject(newUserProj) {
 async function updateProject(request) {
     try {
 
+        console.log("Safe endpoint")
         if (request.body.hasOwnProperty('newTitle') && request.body.hasOwnProperty('newIdea')) {
             let pool = await sql.connect(config);
             let projUpdate = await pool.request()
@@ -156,7 +159,7 @@ async function updateProject(request) {
 
 async function updateProjectUnSafe(request) {
     try {
-
+        console.log("using unsafe endpoint")
         let queryString = ""
 
         if (request.body.hasOwnProperty('newTitle') && request.body.hasOwnProperty('newIdea')) {
@@ -169,6 +172,7 @@ async function updateProjectUnSafe(request) {
             queryString = "UPDATE projects SET idea = " + (request.body.newIdea) + " WHERE id = " + (request.body.projectID);
         }
 
+        console.log(queryString)
         let pool = await sql.connect(config);
         let projUpdate = await pool.request()
         .query(queryString)
