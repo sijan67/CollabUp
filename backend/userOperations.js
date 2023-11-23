@@ -1,8 +1,32 @@
+const { query } = require('express');
 var config = require('./dbconfig.js');
 const sql = require('mssql');
+let bcrypt = require('bcrypt');
 
 
 //if using a .input() defined input parameter, the values are sanitized by this method, build in SQL injection protection
+
+
+async function hashPassword(password) {
+    try {
+        const salt = await bcrypt.genSalt(10)
+        return await bcrypt.hash(password, salt)
+        
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+}
+
+async function comparePass(password, digest) {
+    try {
+        return await bcrypt.compare(password, digest);
+    } catch (err) {
+        console.log(err)
+        return false;
+    }
+}
+
 
 async function getUserIDs() {
     try {
@@ -13,6 +37,7 @@ async function getUserIDs() {
     }
     catch (err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -26,6 +51,7 @@ async function getUserByID(userID){
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -40,6 +66,7 @@ async function getUserByUsername(username){
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 }
 
@@ -53,6 +80,49 @@ async function getUserByEmail(email){
     }
     catch(err) {
         console.log(err);
+        return null;
+    }
+}
+
+
+async function getUserDetsByUsername(username) {
+    try {
+        let pool = await sql.connect(config);
+        let userDets = await pool.request()
+        .input('input_param', sql.NVarChar(20), username)
+        .query("SELECT * FROM userDetails where username = @input_param");
+        return userDets.recordsets[0];
+
+    } catch (err) {
+        console.log(err);
+        return null;
+    }
+}
+
+/*
+async function getUserSkills(userID) {
+    try {
+        let pool = await sql.connect(config);
+        let userSkills = await pool.request()
+        .input('input_param', sql.Int, userID)
+        .query("SELECT * FROM userSkills WHERE userID = @input_param");
+        return userSkills.recordsets[0];
+    } catch (err) {
+        console.log(err);
+    }
+}
+*/
+
+async function getUserPic(userID) {
+    try {
+        let pool = await sql.connect(config);
+        let userPic = await pool.request()
+        .input('input_param', sql.Int, userID)
+        .query("SELECT * FROM userPics WHERE userID = @input_param");
+        return userPic.recordsets[0];
+    } catch (err) {
+        console.log(err);
+        return null;
     }
 }
 
@@ -102,17 +172,20 @@ async function getPassFromLogin(loginName){
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 }
 
 
 async function addUser(newUser) {
     try {
+        let newUserID = await getNextPrimaryID("users");
+        let hashedPassword = await hashPassword(newUser.password)
         let pool = await sql.connect(config);
         let insertUser = await pool.request()
-        .input('input_id', sql.Int, newUser.id)
+        .input('input_id', sql.Int, newUserID)
         .input('input_username', sql.NVarChar(20), newUser.username)
-        .input('input_password', sql.NVarChar(20), newUser.password)
+        .input('input_password', sql.NVarChar(100), hashedPassword)
         .input('input_email', sql.NVarChar(50), newUser.email)
         .input('input_firstname', sql.NVarChar(20), newUser.firstName)
         .input('input_lastname', sql.NVarChar(30), newUser.lastName)
@@ -121,6 +194,7 @@ async function addUser(newUser) {
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 
 }
@@ -135,27 +209,69 @@ async function addUserDetails(newUserDetails) {
         .input('input_username', sql.NVarChar(20), newUserDetails.username)
         .input('input_birthdate', sql.DateTime, newUserDetails.birthdate)
         .input('input_occupation', sql.NVarChar(50), newUserDetails.occupation)
+        .input('input_skill', sql.NVarChar(30), newUserDetails.skill)
         .input('input_experience', sql.Int, newUserDetails.experience)
         .input('input_location', sql.NVarChar(50), newUserDetails.location)
         .input('input_worklink', sql.NVarChar(50), newUserDetails.worklink)
         .input('input_pubemail', sql.NVarChar(50), newUserDetails.pubemail)
         .input('input_description', sql.NVarChar(200), newUserDetails.description)
         .input('input_achievements', sql.NVarChar(100), newUserDetails.achievements)
-        .query("INSERT INTO userDetails (id, username, birthdate, occupation, experience, location, worklink, pubemail, description, achievements) VALUES (@input_id, @input_username, @input_birthdate, @input_occupation, @input_experience, @input_location, @input_worklink, @input_pubemail, @input_description, @input_achievements)");
+        .query("INSERT INTO userDetails (id, username, birthdate, occupation, skill, experience, location, worklink, pubemail, description, achievements) VALUES (@input_id, @input_username, @input_birthdate, @input_occupation, @input_skill, @input_experience, @input_location, @input_worklink, @input_pubemail, @input_description, @input_achievements)");
         return insterUserDetails.recordsets;
     }
     catch(err) {
         console.log(err);
+        return null;
     }
 
 }
 
+async function addUserPic(newUserPic) {
+    try {
+        let newPicID = await getNextPrimaryID("userPics");
+        let buf = Buffer.from(newUserPic.profPic, 'base64');
 
+        let pool = await sql.connect(config);
+        let insterUserPic = await pool.request()
+        .input('input_id', sql.Int, newPicID)
+        .input('input_userID', sql.Int, newUserPic.userID)
+        .input('input_profpic', sql.VarBinary(sql.MAX), buf)
+        .query("INSERT INTO userPics (id, userID, profPic) VALUES (@input_id, @input_userID, @input_profpic)");
+        return insterUserPic.recordsets;
+    }
+    catch(err) {
+        console.log(err);
+        return null;
+    }
+}
 
-async function getNewUserID() {
+/*
+async function addUserSkill(newUserSkill) {
+    try {
+        let newSkillID = await getNextPrimaryID("userSkills");
+
+        let pool = await sql.connect(config);
+        let insertUserSkill = await pool.request()
+        .input('input_id', sql.Int, newSkillID)
+        .input('input_userID', sql.Int, newUserSkill.userID)
+        .input('input_skill', sql.NVarChar(30), newUserSkill.skill)
+        .input('input_experience', sql.Int, newUserSkill.experience)
+        .query("INSERT INTO userSkills (id, userID, skill, experience) VALUES (@input_id, @input_userID, @input_skill, @input_experience)");
+        return insertUserSkill.recordsets;
+    }
+    catch(err) {
+        console.log(err);
+        return null;
+    }
+}
+*/
+
+async function getNextPrimaryID(tableName) {
+    const queryString = "SELECT MAX(id) as maxID FROM " + tableName + ";"
     let pool = await sql.connect(config);
-    let highestUserID = await pool.request().query("SELECT MAX(id) as maxID FROM users");
-    return highestUserID.recordset[0].maxID+1;
+    let highestNextID = await pool.request()
+    .query(queryString);
+    return highestNextID.recordset[0].maxID+1;
 }
 
 
@@ -163,9 +279,15 @@ module.exports = {
     getUserIDs: getUserIDs,
     getUserByID: getUserByID,
     addUser: addUser,
-    getNewUserID: getNewUserID,
     getPassFromLogin: getPassFromLogin,
     getUserByUsername: getUserByUsername,
     checkUserExists: checkUserExists,
-    addUserDetails: addUserDetails
+    addUserDetails: addUserDetails,
+    getNextPrimaryID: getNextPrimaryID,
+    addUserPic: addUserPic,
+    //addUserSkill: addUserSkill,
+    getUserDetsByUsername: getUserDetsByUsername,
+    //getUserSkills: getUserSkills,
+    getUserPic: getUserPic,
+    comparePass: comparePass
 }

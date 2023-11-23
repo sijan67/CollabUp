@@ -11,7 +11,6 @@ import DateOfBirth from '../screens/DateOfBirthPage/DateOfBirthPage';
 import PersonalDetails1 from '../screens/PersonalDetails1Page/PersonalDetails1Page';
 import PersonalDetails2 from '../screens/PersonalDetails2Page/PersonalDetails2Page';
 import UploadPicture from '../screens/UploadPicturesPage/UploadPicturePage';
-
 import { PostProvider } from '../context/post-context';
 
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
