@@ -78,7 +78,7 @@ async function fetchUserByUsername(userID) {
   
 
 // fetch user profile picture 
-async function fetchUserProfilePic(username) {
+export async function fetchUserProfilePic(username) {
     console.log("inside fetchUserProfilePic" + username)
     const url = `https://collabup.loca.lt/getUserPic/${username}`;
   

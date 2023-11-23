@@ -24,6 +24,8 @@ import PostItem from "../../components/PostItem";
 import { generatePostsFromAPI } from "../../utils/backend-data";
 import { useUserContext } from "../../context/user-context";
 import { LogBox } from 'react-native';
+import {fetchUserProfilePic} from "../../utils/backend-data"
+
 LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
 LogBox.ignoreAllLogs();//Ignore all log notifications
 
@@ -115,8 +117,7 @@ export default function Dashboard() {
       const responseData = await response.json();
       const projectId = responseData.projectID;
   
-      console.log('postData.image:', postData.image.substring(0, 100));
-
+    
       // Call the function to post the picture
       const success = await sendPicture(projectId, postData.image);
   
@@ -168,12 +169,13 @@ export default function Dashboard() {
     // addPost(newPost);
 
     const { title, skills, idea, image, author } = newPost;
+    const userProfilePic = await fetchUserProfilePic(user);
 
     const newPostObject = { 
       "author":{
           // "id":"3d25f77b-0dfa-4459-abe2-7c50bd46bfe9",
           "name":user, // Make this dynamic
-          "photo":"https://avatars.githubusercontent.com/u/60666922", // make this dynamic
+          "photo":userProfilePic, // make this dynamic
           "skills": skills
       },
       "content": idea,
